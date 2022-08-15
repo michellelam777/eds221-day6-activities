@@ -43,7 +43,8 @@ lobster_abundance_legal <- lobster_abundance_2020 |>
   summarize(count = n())
 
 ggplot(lobster_abundance_legal, aes(x = site, y = count)) +
-  geom_col(aes(fill = legal), position = "fill")
+  geom_col(aes(fill = legal), position = "fill") +
+  scale_fill_manual(values = c("skyblue3","pink3"))
 ```
 
 Task 3: Random lobster wrangling
