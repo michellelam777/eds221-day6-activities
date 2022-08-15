@@ -1,0 +1,84 @@
+---
+title: "Lobster Exploration"
+author: "Michelle Lam"
+date: "2022-08-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+Task 2: SBC Lobsters
+```{r}
+lobster_abundance <- read_csv(here("data", "Lobster_Abundance_All_Years_20210412.csv"), na = c("-99999", "")) |> 
+  clean_names() |> 
+  uncount(count)
+
+# Create summary table that finds the total counts and mean carapace lengths of lobsters observed in the dataset by site and year
+lobster_abundance_summary <- lobster_abundance |> 
+  group_by(site, year) |> 
+  summarize(count = n(), 
+            mean_size_mm = mean(size_mm, na.rm = TRUE))
+
+# create ggploy graph of the number of total lobsters observed (y-axis) by year (x-axis) in the study, grouped by site
+ggplot(data = lobster_abundance_summary, aes(x = year, y = count)) +
+  geom_line(aes(color = site)) +
+  facet_wrap(~site)
+```
+
+Legal lobster size in California is 79.76 mm
+```{r}
+# create a subset that only contains lobster data from 2020
+lobster_abundance_2020 <- lobster_abundance |> 
+  filter(year == 2020)
+
+# find counts of lobsters observed at each site that are above and below the legal limit
+lobster_abundance_legal <- lobster_abundance_2020 |> 
+  mutate(legal = ifelse(size_mm < 79.76, "no", "yes")) |> 
+  group_by(site, legal) |> 
+  summarize(count = n())
+
+ggplot(lobster_abundance_legal, aes(x = site, y = count)) +
+  geom_col(aes(fill = legal), position = "fill")
+```
+
+Task 3: Random lobster wrangling
+```{r}
+# filter practice
+ex_a <- lobster_abundance |> 
+  filter(site %in% c("IVEE", "CARP", "NAPL"))
+
+ex_b <- lobster_abundance |> 
+  filter(month == 8)
+
+ex_c <- lobster_abundance |> 
+  filter(site == "AQUE" | size_mm > 70)
+
+ex_d <- lobster_abundance |> 
+  filter(site != "NAPL")
+
+# group by and summarize practice
+ex_e <- lobster_abundance |> 
+  group_by(site) |> 
+  summarize(mean_size= mean(size_mm, na.rm = TRUE),
+            std_dev_size = sd(size_mm, na.rm= TRUE))
+
+ex_f <- lobster_abundance |> 
+  group_by(site, month) |> 
+  summarize(max_size = max(size_mm, na.rm = TRUE))
+
+# mutate practice
+ex_g <- lobster_abundance |> 
+  mutate(size_cm = size_mm/10)
+
+ex_h <- lobster_abundance |> 
+  mutate(site = tolower(site))
+  
+ex_i <- lobster_abundance |> 
+  mutate(area = as.character(area))
+```
+
